@@ -24,6 +24,9 @@ public class UserServiceImpl implements UserService{
                 .accountNumber(AccountUtils.generateAccountNumber())
                 .accountBalance(BigDecimal.ZERO)
                 .email(userRequest.getEmail())
+                .phoneNumber(userRequest.getPhoneNumber())
+                .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
+                .status("Active")
                 .build();
 
 

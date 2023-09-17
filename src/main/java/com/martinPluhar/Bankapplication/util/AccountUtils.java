@@ -13,7 +13,7 @@ public class AccountUtils {
         Year currentYear = Year.now();
         int min = 100000;
         int max = 999999;
-
+        String bankCode = "/0100";
         //* generate a random number between mind and max
 
         int randNumber = (int) Math.floor(Math.random() * (max - min + 1) + min);
@@ -22,6 +22,6 @@ public class AccountUtils {
         String year = String.valueOf(currentYear);
         String randomNumber = String.valueOf(randNumber);
 
-        return year + randomNumber;
+        return year + randomNumber + bankCode;
     }
 }
