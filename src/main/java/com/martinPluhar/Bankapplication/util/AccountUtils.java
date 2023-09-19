@@ -3,7 +3,11 @@ package com.martinPluhar.Bankapplication.util;
 import java.time.Year;
 
 public class AccountUtils {
+    public static final String ACCOUNT_EXIST_CODE = "001";
+    public static final String ACCOUNT_EXIST_MESSAGE = "This user account already exist!";
 
+    public static final String ACCOUNT_CREATION_SUCCESS ="001";
+    public static final String ACCOUNT_CREATION_MESSAGE = "Account has been successfully created!";
     public static String generateAccountNumber() {
 
         /*

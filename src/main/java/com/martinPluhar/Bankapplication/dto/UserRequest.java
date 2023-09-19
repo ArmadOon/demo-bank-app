@@ -12,12 +12,11 @@ import lombok.NoArgsConstructor;
 public class UserRequest {
     private String firstName;
     private String lastName;
-    private String middleName;
+    private String anotherName;
     private String gander;
     private String address;
     private String stateOfOrigin;
     private String email;
     private String phoneNumber;
     private String alternativePhoneNumber;
-    private String status;
 }
