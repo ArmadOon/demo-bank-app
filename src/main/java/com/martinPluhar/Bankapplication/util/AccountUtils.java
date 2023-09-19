@@ -11,7 +11,8 @@ public class AccountUtils {
     public static String generateAccountNumber() {
 
         /*
-          2023 + random six digits
+          2023 + random six digits + bank code
+          example "202312878/0100"
          */
 
         Year currentYear = Year.now();

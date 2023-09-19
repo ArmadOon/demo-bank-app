@@ -2,6 +2,7 @@ package com.martinPluhar.Bankapplication.services.impl;
 
 import com.martinPluhar.Bankapplication.dto.AccountInfo;
 import com.martinPluhar.Bankapplication.dto.BankResponse;
+import com.martinPluhar.Bankapplication.dto.EmailDetails;
 import com.martinPluhar.Bankapplication.dto.UserRequest;
 import com.martinPluhar.Bankapplication.entity.User;
 import com.martinPluhar.Bankapplication.repository.UserRepository;
@@ -15,6 +16,9 @@ import java.math.BigDecimal;
 public class UserServiceImpl implements UserService {
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    EmailService emailService;
 
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
@@ -46,14 +50,26 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         User savedUser = userRepository.save(newUser);
-    return BankResponse.builder()
-            .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
-            .responseMessage(AccountUtils.ACCOUNT_CREATION_MESSAGE)
-            .accountInfo(AccountInfo.builder()
-                    .accountBalance(savedUser.getAccountBalance())
-                    .accountNumber(savedUser.getAccountNumber())
-                    .accountName(savedUser.getFirstName() +" " + savedUser.getLastName()+ " " + savedUser.getAnotherName())
-                    .build())
-            .build();
+
+        // Send email alert
+        EmailDetails emailDetails = EmailDetails.builder()
+                .recipient(savedUser.getEmail())
+                .subject("Account creation")
+                .messageBody("Congratulations and welcome! Your account was successfully created!\n" +
+                        "Your accounts details: \n" +
+                        "Account name:" + savedUser.getFirstName() + " "
+                        + savedUser.getLastName() + " "
+                        + savedUser.getAnotherName() + "\nAccount number:" + savedUser.getAccountNumber())
+                .build();
+        emailService.sendEmailAlert(emailDetails);
+        return BankResponse.builder()
+                .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
+                .responseMessage(AccountUtils.ACCOUNT_CREATION_MESSAGE)
+                .accountInfo(AccountInfo.builder()
+                        .accountBalance(savedUser.getAccountBalance())
+                        .accountNumber(savedUser.getAccountNumber())
+                        .accountName(savedUser.getFirstName() + " " + savedUser.getLastName() + " " + savedUser.getAnotherName())
+                        .build())
+                .build();
     }
 }
