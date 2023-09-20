@@ -111,7 +111,7 @@ public class UserServiceImpl implements UserService {
     public BankResponse creditAccount(CreditDebitRequest request) {
         // check if account exists
         boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
-        if(!isAccountExist){
+        if (!isAccountExist) {
             return BankResponse.builder()
                     .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
                     .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
@@ -121,13 +121,15 @@ public class UserServiceImpl implements UserService {
 
         User userToCredit = userRepository.findByAccountNumber(request.getAccountNumber());
         userToCredit.setAccountBalance(userToCredit.getAccountBalance().add(request.getAmount()));
-
+        userRepository.save(userToCredit);
         return BankResponse.builder()
                 .responseCode(AccountUtils.ACCOUNT_CREDITED_SUCCESS)
                 .responseMessage(AccountUtils.ACCOUNT_CREDITED_SUCCESS_MESSAGE)
                 .accountInfo(AccountInfo.builder()
                         .accountName(userToCredit.getFirstName() + " " + userToCredit.getLastName() + " "
                                 + userToCredit.getAnotherName())
+                        .accountBalance(userToCredit.getAccountBalance())
+                        .accountNumber(request.getAccountNumber())
                         .build())
                 .build();
     }

@@ -1,6 +1,7 @@
 package com.martinPluhar.Bankapplication.controllers;
 
 import com.martinPluhar.Bankapplication.dto.BankResponse;
+import com.martinPluhar.Bankapplication.dto.CreditDebitRequest;
 import com.martinPluhar.Bankapplication.dto.EnquiryRequest;
 import com.martinPluhar.Bankapplication.dto.UserRequest;
 import com.martinPluhar.Bankapplication.services.impl.UserService;
@@ -17,13 +18,16 @@ public class UserController {
         return userService.createAccount(userRequest);
     }
 
-    @GetMapping("/balanceEnquiry")
+    @GetMapping("balanceEnquiry")
     public BankResponse balanceEnquiry(@RequestBody EnquiryRequest request){
         return userService.balanceEnquiry(request);
     }
-    @GetMapping("/nameEnquiry")
+    @GetMapping("nameEnquiry")
     public String nameEnquiry(@RequestBody EnquiryRequest request){
         return userService.nameEnquiry(request);
     }
-
+    @PostMapping("credit")
+    public BankResponse creditAccount(@RequestBody CreditDebitRequest request){
+        return userService.creditAccount(request);
+    }
 }
