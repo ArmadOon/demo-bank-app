@@ -11,13 +11,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailServiceImpl implements EmailService{
     @Autowired
-    JavaMailSender javaMailSender;
+    private JavaMailSender javaMailSender;
+
     @Value("${spring.mail.username}")
     private String senderEmail;
 
+
     @Override
     public void sendEmailAlert(EmailDetails emailDetails) {
-        try{
+        try {
             SimpleMailMessage mailMessage = new SimpleMailMessage();
             mailMessage.setFrom(senderEmail);
             mailMessage.setTo(emailDetails.getRecipient());
@@ -25,10 +27,8 @@ public class EmailServiceImpl implements EmailService{
             mailMessage.setSubject(emailDetails.getSubject());
 
             javaMailSender.send(mailMessage);
-
             System.out.println("Mail sent successfully");
-        } catch(MailException e){
+        } catch (MailException e) {
             throw new RuntimeException(e);
         }
-    }
-}
+}}
