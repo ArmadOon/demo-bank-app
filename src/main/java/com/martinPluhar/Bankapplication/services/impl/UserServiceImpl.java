@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
                 .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
                 .status("Active")
                 .build();
-
+          // save user
         User savedUser = userRepository.save(newUser);
 
         // Send email alert
@@ -118,9 +118,13 @@ public class UserServiceImpl implements UserService {
                     .accountInfo(null)
                     .build();
         }
-
+        //find user by account number
         User userToCredit = userRepository.findByAccountNumber(request.getAccountNumber());
+        //add credit
+
         userToCredit.setAccountBalance(userToCredit.getAccountBalance().add(request.getAmount()));
+
+        // Save user
         userRepository.save(userToCredit);
         return BankResponse.builder()
                 .responseCode(AccountUtils.ACCOUNT_CREDITED_SUCCESS)
@@ -132,6 +136,20 @@ public class UserServiceImpl implements UserService {
                         .accountNumber(request.getAccountNumber())
                         .build())
                 .build();
+    }
+
+    @Override
+    public BankResponse debitAccount(CreditDebitRequest request) {
+        // Check if account exists
+        boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
+        if (!isAccountExist) {
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+        }
+        // Check if amount we want to withdraw is not more than current balance
     }
 
 
