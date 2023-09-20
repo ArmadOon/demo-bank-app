@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -19,7 +20,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
-        /**
+        /*
          * Creating an acc - saving a new user into database.
          * Check if user already has an account
          */
@@ -45,7 +46,7 @@ public class UserServiceImpl implements UserService {
                 .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
                 .status("Active")
                 .build();
-          // save user
+        // save user
         User savedUser = userRepository.save(newUser);
 
         // Send email alert
@@ -150,6 +151,33 @@ public class UserServiceImpl implements UserService {
                     .build();
         }
         // Check if amount we want to withdraw is not more than current balance
+
+        User userToDebit = userRepository.findByAccountNumber(request.getAccountNumber());
+
+        // Transfer Big decimal to Big Integer for available balance
+        BigInteger availableBalance = userToDebit.getAccountBalance().toBigInteger();
+        BigInteger debitAmount = request.getAmount().toBigInteger();
+        if (availableBalance.intValue() < debitAmount.intValue()) {
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.INSUFFICIENT_BALANCE_CODE)
+                    .responseMessage(AccountUtils.INSUFFICIENT_BALANCE_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+        } else {
+            userToDebit.setAccountBalance(userToDebit.getAccountBalance().subtract(request.getAmount()));
+            userRepository.save(userToDebit);
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.TRANSFER_SUCCESSFUL_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_DEBITED_MESSAGE)
+                    .accountInfo(AccountInfo.builder()
+                            .accountName(userToDebit.getFirstName() + " " + userToDebit.getLastName()+ " "
+                                    + userToDebit.getAnotherName())
+                            .accountBalance(userToDebit.getAccountBalance())
+                            .accountNumber(request.getAccountNumber())
+                            .build())
+                    .build();
+        }
+
     }
 
 
