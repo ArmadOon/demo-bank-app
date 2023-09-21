@@ -140,6 +140,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public BankResponse transfer(TransferRequest request) {
+        // check account to debit (check if it exists)
+        boolean isDestinationAccountExist = userRepository.existsByAccountNumber(request.getDestinationAccountNumber());
+        if (!isDestinationAccountExist) {
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+        }
+
+        // check if the amount debited is not more than current balance
+
+        //debit the account
+
+        //get account to credit
+
+        //credit account
+    }
+
+    @Override
     public BankResponse debitAccount(CreditDebitRequest request) {
         // Check if account exists
         boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
@@ -170,13 +191,14 @@ public class UserServiceImpl implements UserService {
                     .responseCode(AccountUtils.TRANSFER_SUCCESSFUL_CODE)
                     .responseMessage(AccountUtils.ACCOUNT_DEBITED_MESSAGE)
                     .accountInfo(AccountInfo.builder()
-                            .accountName(userToDebit.getFirstName() + " " + userToDebit.getLastName()+ " "
+                            .accountName(userToDebit.getFirstName() + " " + userToDebit.getLastName() + " "
                                     + userToDebit.getAnotherName())
                             .accountBalance(userToDebit.getAccountBalance())
                             .accountNumber(request.getAccountNumber())
                             .build())
                     .build();
         }
+
 
     }
 
