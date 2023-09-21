@@ -52,10 +52,10 @@ public class UserServiceImpl implements UserService {
         // Send email alert
         EmailDetails emailDetails = EmailDetails.builder()
                 .recipient(savedUser.getEmail())
-                .subject("Account creation")
-                .messageBody("Congratulations and welcome! Your account was successfully created!\n"
-                        + "Your accounts details: \n" + "Account name: " + savedUser.getFirstName() + " "
-                        + savedUser.getLastName() + " " + savedUser.getAnotherName() + "\nAccount number: "
+                .subject("Založení účtu")
+                .messageBody("Skvělá zpráva! Váš účet byl úspěšně vytvořen!\n"
+                        + "Detaily účtu: \n" + "Jméno klienta: " + savedUser.getFirstName() + " "
+                        + savedUser.getLastName() + " " + savedUser.getAnotherName() + "\nČíslo účtu: "
                         + savedUser.getAccountNumber())
                 .build();
         emailService.sendEmailAlert(emailDetails);
@@ -152,7 +152,8 @@ public class UserServiceImpl implements UserService {
         }
 
         User sourceAccountUser = userRepository.findByAccountNumber(request.getSourceAccountNumber());
-        String sourceUsername = sourceAccountUser.getFirstName() + " " + sourceAccountUser.getLastName() + " " + sourceAccountUser.getAnotherName();
+        String sourceUsername = sourceAccountUser.getFirstName() + " " + sourceAccountUser.getLastName() + " "
+                + sourceAccountUser.getAnotherName();
         // check if the amount debited is not more than current balance
         if (request.getAmount().compareTo(sourceAccountUser.getAccountBalance()) > 0) {
             return BankResponse.builder()
@@ -182,7 +183,8 @@ public class UserServiceImpl implements UserService {
         EmailDetails creditAlert = EmailDetails.builder()
                 .subject("Upozornění na credit")
                 .recipient(sourceAccountUser.getEmail())
-                .messageBody("Částka " + request.getAmount() + "byla přijata na váš účet od odesilatele:" + sourceUsername + " Váš aktuální zůstate činí " + sourceAccountUser.getAccountBalance())
+                .messageBody("Částka " + request.getAmount() + "byla přijata na váš účet od odesilatele:"
+                        + sourceUsername + " Váš aktuální zůstate činí " + sourceAccountUser.getAccountBalance())
                 .build();
         emailService.sendEmailAlert(creditAlert);
 
