@@ -151,13 +151,45 @@ public class UserServiceImpl implements UserService {
                     .build();
         }
 
+        User sourceAccountUser = userRepository.findByAccountNumber(request.getSourceAccountNumber());
+        String sourceUsername = sourceAccountUser.getFirstName() + " " + sourceAccountUser.getLastName() + " " + sourceAccountUser.getAnotherName();
         // check if the amount debited is not more than current balance
-
+        if (request.getAmount().compareTo(sourceAccountUser.getAccountBalance()) > 0) {
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.INSUFFICIENT_BALANCE_CODE)
+                    .responseMessage(AccountUtils.INSUFFICIENT_BALANCE_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+        }
         //debit the account
+        sourceAccountUser.setAccountBalance(sourceAccountUser.getAccountBalance().subtract(request.getAmount()));
+        userRepository.save(sourceAccountUser);
 
+        //make email alert
+        EmailDetails debitAlert = EmailDetails.builder()
+                .subject("Upozornění na debit")
+                .recipient(sourceAccountUser.getEmail())
+                .messageBody("Částka" + request.getAmount() + " byla odeslána z vašeho účtu. Váš aktuální zůstatek činí: "
+                        + sourceAccountUser.getAccountBalance())
+                .build();
+        emailService.sendEmailAlert(debitAlert);
         //get account to credit
-
+        User destinationAccountUser = userRepository.findByAccountNumber((request.getDestinationAccountNumber()));
         //credit account
+        destinationAccountUser.setAccountBalance(destinationAccountUser.getAccountBalance().add(request.getAmount()));
+        userRepository.save(destinationAccountUser);
+
+        EmailDetails creditAlert = EmailDetails.builder()
+                .subject("Upozornění na credit")
+                .recipient(sourceAccountUser.getEmail())
+                .messageBody("Částka " + request.getAmount() + "byla přijata na váš účet od odesilatele:" + sourceUsername + " Váš aktuální zůstate činí " + sourceAccountUser.getAccountBalance())
+                .build();
+        emailService.sendEmailAlert(creditAlert);
+
+        return BankResponse.builder()
+                .responseCode(AccountUtils.TRANSFER_SUCCESSFUL_CODE)
+                .responseMessage(AccountUtils.TRANSFER_SUCCESSFUL_MESSAGE)
+                .build();
     }
 
     @Override
@@ -188,7 +220,7 @@ public class UserServiceImpl implements UserService {
             userToDebit.setAccountBalance(userToDebit.getAccountBalance().subtract(request.getAmount()));
             userRepository.save(userToDebit);
             return BankResponse.builder()
-                    .responseCode(AccountUtils.TRANSFER_SUCCESSFUL_CODE)
+                    .responseCode(AccountUtils.ACCOUNT_DEBITED_SUCCESS)
                     .responseMessage(AccountUtils.ACCOUNT_DEBITED_MESSAGE)
                     .accountInfo(AccountInfo.builder()
                             .accountName(userToDebit.getFirstName() + " " + userToDebit.getLastName() + " "
