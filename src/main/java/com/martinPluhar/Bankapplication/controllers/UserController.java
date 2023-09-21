@@ -1,9 +1,6 @@
 package com.martinPluhar.Bankapplication.controllers;
 
-import com.martinPluhar.Bankapplication.dto.BankResponse;
-import com.martinPluhar.Bankapplication.dto.CreditDebitRequest;
-import com.martinPluhar.Bankapplication.dto.EnquiryRequest;
-import com.martinPluhar.Bankapplication.dto.UserRequest;
+import com.martinPluhar.Bankapplication.dto.*;
 import com.martinPluhar.Bankapplication.services.impl.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -33,5 +30,10 @@ public class UserController {
     @PostMapping("debit")
     public BankResponse debitAccount(@RequestBody CreditDebitRequest request){
         return userService.debitAccount(request);
+    }
+
+    @PostMapping("transfer")
+    public BankResponse transfer(@RequestBody TransferRequest request){
+        return userService.transfer(request);
     }
 }
