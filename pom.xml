@@ -69,8 +69,8 @@
                 <configuration>
                     <excludes>
                         <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
+                          <  <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>>
                         </exclude>
                     </excludes>
                 </configuration>
