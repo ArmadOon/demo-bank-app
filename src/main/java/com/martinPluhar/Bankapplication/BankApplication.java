@@ -12,13 +12,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @OpenAPIDefinition(
 		info = @Info(
-				title = "Spring-boot Bank project",
+				title = "Spring-boot Bank project for KB Bank",
 				description = "Project for job apply in KB bank CZ",
 				version = "v1.0.0",
 				contact = @Contact(
 						name = "Martin Pluhař",
 						email = "pluhar.martin@outlook.com",
-						url =  "https://github.com/ArmadOon/demo-bank-app"
+						url =  "https://www.linkedin.com/in/martin-pluha%C5%99-51582a217/"
 				),
 				license = @License(
 						name = "Martin Pluhař",
