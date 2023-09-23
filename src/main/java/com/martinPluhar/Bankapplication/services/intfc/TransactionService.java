@@ -1,5 +1,7 @@
 package com.martinPluhar.Bankapplication.services.intfc;
 
-public interface TransactionService {
+import com.martinPluhar.Bankapplication.entity.Transaction;
 
+public interface TransactionService {
+    void saveTransaction(Transaction transaction);
 }
