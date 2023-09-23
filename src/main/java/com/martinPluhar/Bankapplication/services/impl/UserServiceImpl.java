@@ -4,6 +4,7 @@ import com.martinPluhar.Bankapplication.dto.*;
 import com.martinPluhar.Bankapplication.entity.User;
 import com.martinPluhar.Bankapplication.repository.UserRepository;
 import com.martinPluhar.Bankapplication.services.intfc.EmailService;
+import com.martinPluhar.Bankapplication.services.intfc.TransactionService;
 import com.martinPluhar.Bankapplication.services.intfc.UserService;
 import com.martinPluhar.Bankapplication.util.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     UserRepository userRepository;
 
+
     @Autowired
     EmailService emailService;
+
+    @Autowired
+    TransactionService transactionService;
 
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
@@ -129,6 +134,15 @@ public class UserServiceImpl implements UserService {
 
         // Save user
         userRepository.save(userToCredit);
+
+        // Saving the transaction
+        TransactionDto transactionDto = TransactionDto.builder()
+                .accountNumber(userToCredit.getAccountNumber())
+                .transactionType("CREDIT")
+                .amount(request.getAmount())
+                .build();
+        transactionService.saveTransaction(transactionDto);
+
         return BankResponse.builder()
                 .responseCode(AccountUtils.ACCOUNT_CREDITED_SUCCESS)
                 .responseMessage(AccountUtils.ACCOUNT_CREDITED_SUCCESS_MESSAGE)
@@ -176,6 +190,9 @@ public class UserServiceImpl implements UserService {
                         + sourceAccountUser.getAccountBalance())
                 .build();
         emailService.sendEmailAlert(debitAlert);
+
+
+
         //get account to credit
         User destinationAccountUser = userRepository.findByAccountNumber((request.getDestinationAccountNumber()));
         //credit account
@@ -189,6 +206,16 @@ public class UserServiceImpl implements UserService {
                         + sourceUsername + " Váš aktuální zůstate činí " + sourceAccountUser.getAccountBalance())
                 .build();
         emailService.sendEmailAlert(creditAlert);
+
+        // Saving credit transaction
+        TransactionDto transactionDto = TransactionDto.builder()
+                .accountNumber(destinationAccountUser.getAccountNumber())
+                .transactionType("CREDIT")
+                .amount(request.getAmount())
+                .build();
+
+        transactionService.saveTransaction(transactionDto);
+
 
         return BankResponse.builder()
                 .responseCode(AccountUtils.TRANSFER_SUCCESSFUL_CODE)
@@ -224,6 +251,15 @@ public class UserServiceImpl implements UserService {
         } else {
             userToDebit.setAccountBalance(userToDebit.getAccountBalance().subtract(request.getAmount()));
             userRepository.save(userToDebit);
+
+            TransactionDto transactionDto = TransactionDto.builder()
+                    .accountNumber(userToDebit.getAccountNumber())
+                    .transactionType("DEBIT")
+                    .amount(request.getAmount())
+                    .build();
+
+            transactionService.saveTransaction(transactionDto);
+
             return BankResponse.builder()
                     .responseCode(AccountUtils.ACCOUNT_DEBITED_SUCCESS)
                     .responseMessage(AccountUtils.ACCOUNT_DEBITED_MESSAGE)
