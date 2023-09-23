@@ -3,6 +3,8 @@ package com.martinPluhar.Bankapplication.services.impl;
 import com.martinPluhar.Bankapplication.dto.*;
 import com.martinPluhar.Bankapplication.entity.User;
 import com.martinPluhar.Bankapplication.repository.UserRepository;
+import com.martinPluhar.Bankapplication.services.intfc.EmailService;
+import com.martinPluhar.Bankapplication.services.intfc.UserService;
 import com.martinPluhar.Bankapplication.util.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

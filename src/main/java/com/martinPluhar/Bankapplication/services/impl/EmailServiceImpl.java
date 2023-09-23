@@ -1,6 +1,7 @@
 package com.martinPluhar.Bankapplication.services.impl;
 
 import com.martinPluhar.Bankapplication.dto.EmailDetails;
+import com.martinPluhar.Bankapplication.services.intfc.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
@@ -9,7 +10,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EmailServiceImpl implements EmailService{
+public class EmailServiceImpl implements EmailService {
     @Autowired
     private JavaMailSender javaMailSender;
 

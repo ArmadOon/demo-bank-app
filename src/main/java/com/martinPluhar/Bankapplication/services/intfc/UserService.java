@@ -1,4 +1,4 @@
-package com.martinPluhar.Bankapplication.services.impl;
+package com.martinPluhar.Bankapplication.services.intfc;
 
 import com.martinPluhar.Bankapplication.dto.*;
 import org.hibernate.engine.jdbc.batch.spi.BatchKey;
