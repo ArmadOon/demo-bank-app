@@ -1,8 +1,7 @@
 package com.martinPluhar.Bankapplication.services.impl;
+
 import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.*;
 import com.martinPluhar.Bankapplication.dto.EmailDetails;
 import com.martinPluhar.Bankapplication.entity.Transaction;
 import com.martinPluhar.Bankapplication.entity.User;
@@ -13,8 +12,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -24,22 +23,22 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 public class BankStatement {
-    /**
-     * retrieve list of transactions within a date range given an account number
-     * generate a pdf file of transactions
-     * send file via email
-     */
 
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
 
-
-    //Location where file will be generated
     private static final String FILE = System.getProperty("user.home") + "/Downloads/MyStatement.pdf";
 
+    private static final String BANK_LOGO_PATH = "/Users/martinpluhy/Documents/KB-Bank-Demo/Bank-application/src/main/resources/static/kb_logo-(1).png"; // Nahraďte cestou k logu banky
+
+    private Font titleFont;
+    private Font subtitleFont;
+    private Font headerFont;
+    private Font contentFont;
+
     public List<Transaction> generateStatement(String accountNumber, String startDate, String endDate)
-            throws FileNotFoundException, DocumentException {
+            throws IOException, DocumentException {
         LocalDate start = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
         LocalDate end = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
         List<Transaction> transactionList = transactionRepository.findByAccountNumberAndCreatedAtBetween(
@@ -48,12 +47,21 @@ public class BankStatement {
 
         Document document = createDocument();
         OutputStream outputStream = new FileOutputStream(FILE);
-        PdfWriter.getInstance(document, outputStream);
-        document.open();
+        PdfWriter writer = PdfWriter.getInstance(document, outputStream);
 
-        addBankInfo(document);
-        addStatementInfo(document, startDate, endDate, user);
-        addTransactionTable(document, transactionList);
+        Image bankLogo = Image.getInstance(BANK_LOGO_PATH);
+        bankLogo.setAlignment(Element.ALIGN_CENTER);
+
+        document.open();
+        document.add(bankLogo);
+
+        addStatementTitle(document, startDate, endDate);
+        addStatementInfo(document, user);
+
+        PdfPTable transactionsTable = createTransactionTable(transactionList);
+        document.add(transactionsTable);
+
+        addPageNumberToFooter(writer);
 
         document.close();
 
@@ -62,77 +70,159 @@ public class BankStatement {
         return transactionList;
     }
 
-    private Document createDocument() throws DocumentException {
+    private Document createDocument() {
         Rectangle statementSize = new Rectangle(PageSize.A4);
         return new Document(statementSize);
     }
 
-    private void addBankInfo(Document document) throws DocumentException {
-        PdfPTable bankInfoTable = createTable(1);
-        bankInfoTable.addCell(createCell("KB Bank", BaseColor.RED, 10f));
-        bankInfoTable.addCell(createCell("Bankovní 22, Praha 6"));
-        document.add(bankInfoTable);
+    private void addStatementTitle(Document document, String startDate, String endDate) throws DocumentException {
+        Paragraph title = new Paragraph("Výpis transakcí", titleFont);
+        title.setAlignment(Element.ALIGN_CENTER);
+
+        Paragraph subtitle = new Paragraph("Od: " + startDate + " Do: " + endDate, subtitleFont);
+        subtitle.setAlignment(Element.ALIGN_CENTER);
+
+        document.add(title);
+        document.add(subtitle);
     }
 
-    private void addStatementInfo(Document document, String startDate, String endDate, User user) throws DocumentException {
+    private void addStatementInfo(Document document, User user) throws DocumentException {
         PdfPTable statementInfo = createTable(2);
-        addCell(statementInfo, "Od data: " + startDate, 2);
-        addCell(statementInfo, "Výpis transakcí", 2);
-        addCell(statementInfo, "Do data: " + endDate, 2);
-        addCell(statementInfo, "Jméno zákazníka: " + user.getFullName(), 2);
-        addCell(statementInfo, "Adresa: " + user.getAddress(), 2);
+        addCell(statementInfo, "Jméno zákazníka: " + user.getFullName(), headerFont, BaseColor.WHITE);
+        addCell(statementInfo, "Adresa: " + user.getAddress(), headerFont, BaseColor.WHITE);
+
         document.add(statementInfo);
     }
 
-    private void addTransactionTable(Document document, List<Transaction> transactionList) throws DocumentException {
+    private PdfPTable createTransactionTable(List<Transaction> transactionList) throws DocumentException {
         PdfPTable transactionsTable = createTable(4);
-        addCell(transactionsTable, "DATE", BaseColor.RED);
-        addCell(transactionsTable, "TRANSACTION TYPE", BaseColor.RED);
-        addCell(transactionsTable, "TRANSACTION AMOUNT", BaseColor.RED);
-        addCell(transactionsTable, "STATUS", BaseColor.RED);
+        transactionsTable.setWidthPercentage(100);
+        transactionsTable.setWidths(new float[]{1, 2, 2, 2});
+        transactionsTable.setHorizontalAlignment(Element.ALIGN_CENTER);
+        PdfPCell headerCell = createCell("Datum", headerFont, BaseColor.GRAY);
+        transactionsTable.addCell(headerCell);
+
+        PdfPCell statusCell = createCell("Typ", headerFont, BaseColor.GRAY);
+        transactionsTable.addCell(statusCell);
+        PdfPCell amountCell = createCell("Transakce", headerFont, BaseColor.GRAY);
+        transactionsTable.addCell(amountCell);
+        PdfPCell typeCell = createCell("Status", headerFont, BaseColor.GRAY);
+        transactionsTable.addCell(typeCell);
+
+
+
+        // Další buňky pro hlavičku a obsah tabulky...
 
         for (Transaction transaction : transactionList) {
-            addCell(transactionsTable, transaction.getCreatedAt().toString(), 2);
-            addCell(transactionsTable, transaction.getTransactionType(), 2);
-            addCell(transactionsTable, transaction.getAmount().toString(), 2);
-            addCell(transactionsTable, transaction.getStatus(), 2);
+            addCell(transactionsTable, transaction.getCreatedAt().toString(), contentFont, BaseColor.WHITE);
+            addCell(transactionsTable, transaction.getTransactionType(), contentFont, BaseColor.WHITE);
+            addCell(transactionsTable, transaction.getAmount().toString(), contentFont, BaseColor.WHITE);
+            addCell(transactionsTable, transaction.getStatus(), contentFont, BaseColor.WHITE);
         }
-        document.add(transactionsTable);
+
+        return transactionsTable;
+    }
+
+    private void addPageNumberToFooter(PdfWriter writer) {
+        Phrase pageNumber = new Phrase("Strana " + writer.getPageNumber(), headerFont);
+        PdfPageEvent event = new PdfPageEvent() {
+            @Override
+            public void onOpenDocument(PdfWriter writer, Document document) {
+
+            }
+
+            @Override
+            public void onStartPage(PdfWriter writer, Document document) {
+
+            }
+
+            @Override
+            public void onEndPage(PdfWriter writer, Document document) {
+                PdfContentByte canvas = writer.getDirectContent();
+                ColumnText.showTextAligned(canvas, Element.ALIGN_CENTER, pageNumber,
+                        (document.right() - document.left()) / 2 + document.leftMargin(),
+                        document.bottom() - 10, 0);
+            }
+
+            @Override
+            public void onCloseDocument(PdfWriter writer, Document document) {
+
+            }
+
+            @Override
+            public void onParagraph(PdfWriter writer, Document document, float paragraphPosition) {
+
+            }
+
+            @Override
+            public void onParagraphEnd(PdfWriter writer, Document document, float paragraphPosition) {
+
+            }
+
+            @Override
+            public void onChapter(PdfWriter writer, Document document, float paragraphPosition, Paragraph title) {
+
+            }
+
+            @Override
+            public void onChapterEnd(PdfWriter writer, Document document, float paragraphPosition) {
+
+            }
+
+            @Override
+            public void onSection(PdfWriter writer, Document document, float paragraphPosition, int depth, Paragraph title) {
+
+            }
+
+            @Override
+            public void onSectionEnd(PdfWriter writer, Document document, float paragraphPosition) {
+
+            }
+
+            @Override
+            public void onGenericTag(PdfWriter writer, Document document, Rectangle rect, String text) {
+
+            }
+
+
+
+        };
+
+        writer.setPageEvent(event);
     }
 
     private PdfPTable createTable(int numColumns) {
         return new PdfPTable(numColumns);
     }
 
-    private PdfPCell createCell(String text, BaseColor backgroundColor, float padding) {
-        PdfPCell cell = new PdfPCell(new Phrase(text));
+    private PdfPCell createCell(String text, Font font, BaseColor backgroundColor, float padding) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
         cell.setBorder(0);
         cell.setBackgroundColor(backgroundColor);
         cell.setPadding(padding);
         return cell;
     }
 
-    private PdfPCell createCell(String text) {
-        return createCell(text, BaseColor.WHITE, 2f);
+    // Přetížená metoda createCell bez parametru pro padding
+    private PdfPCell createCell(String text, Font font, BaseColor backgroundColor) {
+        return createCell(text, font, backgroundColor, 2f);  // Nastavení paddingu na 2f
     }
 
-    private void addCell(PdfPTable table, String text, int i) {
-        table.addCell(createCell(text));
+    private void addCell(PdfPTable table, String text, Font font, BaseColor backgroundColor) {
+        table.addCell(createCell(text, font, backgroundColor));
     }
 
-    private void addCell(PdfPTable table, String text, BaseColor backgroundColor) {
-        PdfPCell cell = createCell(text, backgroundColor, 2f);
-        table.addCell(cell);
-    }
+    private void sendStatementByEmail(String recipientEmail)  {
 
-    private void sendStatementByEmail(String recipientEmail) {
-        EmailDetails emailDetails = EmailDetails.builder()
-                .recipient(recipientEmail)
-                .subject("STATEMENT OF ACCOUNT")
-                .messageBody("Kindly find your requested account statement attached!")
-                .attachment(FILE)
-                .build();
-        emailService.sendEmailWithAttachment(emailDetails);
-    }
+            EmailDetails emailDetails = EmailDetails.builder()
+                    .recipient(recipientEmail)
+                    .subject("VÝPIS ÚČTU")
+                    .messageBody("Váš požadovaný výpis účtu je v příloze!")
+                    .attachment(FILE)
+                    .build();
+            emailService.sendEmailWithAttachment(emailDetails);
 
+
+
+    }
 }

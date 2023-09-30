@@ -2,12 +2,17 @@ package com.martinPluhar.Bankapplication.services.impl;
 
 import com.martinPluhar.Bankapplication.dto.EmailDetails;
 import com.martinPluhar.Bankapplication.services.intfc.EmailService;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -36,6 +41,23 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendEmailWithAttachment(EmailDetails emailDetails) {
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
+            helper.setFrom(senderEmail);
+            helper.setTo(emailDetails.getRecipient());
+            helper.setSubject(emailDetails.getSubject());
+            helper.setText(emailDetails.getMessageBody());
+
+            // Přidání přílohy
+            FileSystemResource file = new FileSystemResource(new File(emailDetails.getAttachment()));
+            helper.addAttachment("MyStatement.pdf", file);
+
+            javaMailSender.send(message);
+            System.out.println("E-mail s přílohou byl odeslán!");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

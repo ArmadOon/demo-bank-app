@@ -186,7 +186,7 @@ public class UserServiceImpl implements UserService {
         EmailDetails debitAlert = EmailDetails.builder()
                 .subject("Upozornění na debit")
                 .recipient(sourceAccountUser.getEmail())
-                .messageBody("Částka" + request.getAmount() + " byla odeslána z vašeho účtu. Váš aktuální zůstatek činí: "
+                .messageBody("Částka " + request.getAmount() + " byla odeslána z vašeho účtu. Váš aktuální zůstatek činí: "
                         + sourceAccountUser.getAccountBalance())
                 .build();
         emailService.sendEmailAlert(debitAlert);
@@ -202,7 +202,7 @@ public class UserServiceImpl implements UserService {
         EmailDetails creditAlert = EmailDetails.builder()
                 .subject("Upozornění na credit")
                 .recipient(sourceAccountUser.getEmail())
-                .messageBody("Částka " + request.getAmount() + "byla přijata na váš účet od odesilatele:"
+                .messageBody("Částka " + request.getAmount() + " byla přijata na váš účet od odesilatele: "
                         + sourceUsername + " Váš aktuální zůstate činí " + sourceAccountUser.getAccountBalance())
                 .build();
         emailService.sendEmailAlert(creditAlert);
