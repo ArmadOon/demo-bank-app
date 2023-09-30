@@ -35,4 +35,8 @@ public class User {
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime modifiedAt;
+
+    public String getFullName() {
+        return firstName + " "+ lastName;
+    }
 }

@@ -32,4 +32,10 @@ public class EmailServiceImpl implements EmailService {
         } catch (MailException e) {
             throw new RuntimeException(e);
         }
-}}
+}
+
+    @Override
+    public void sendEmailWithAttachment(EmailDetails emailDetails) {
+
+    }
+}
