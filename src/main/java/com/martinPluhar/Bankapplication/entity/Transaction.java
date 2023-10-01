@@ -28,10 +28,5 @@ public class Transaction {
     private LocalDate createdAt;
     @UpdateTimestamp
     private LocalDate modifiedAt;
-    @Getter
-    private String accountNumber;
 
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
-    }
 }

@@ -3,6 +3,7 @@ package com.martinPluhar.Bankapplication.services.impl;
 import com.martinPluhar.Bankapplication.dto.EmailDetails;
 import com.martinPluhar.Bankapplication.services.intfc.EmailService;
 import jakarta.mail.internet.MimeMessage;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -19,9 +20,9 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private JavaMailSender javaMailSender;
 
+    @Getter
     @Value("${spring.mail.username}")
     private String senderEmail;
-
 
     @Override
     public void sendEmailAlert(EmailDetails emailDetails) {

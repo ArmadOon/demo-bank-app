@@ -22,9 +22,9 @@ public class TransactionController {
     private BankStatement bankStatement;
 
     @GetMapping
-    public List<Transaction> generateBankStatement(@RequestParam String senderAccount,
+    public List<Transaction> generateBankStatement(@RequestParam String accountNumber,
                                                    @RequestParam String startDate,
                                                    @RequestParam String endDate) throws DocumentException, IOException {
-        return bankStatement.generateStatement(senderAccount, startDate, endDate);
+        return bankStatement.generateStatement(accountNumber, startDate, endDate);
     }
 }
