@@ -5,8 +5,7 @@ import java.time.Year;
 public class AccountUtils {
     public static final String ACCOUNT_EXIST_CODE = "001";
     public static final String ACCOUNT_EXIST_MESSAGE = "Tento účet již existuje!";
-
-    public static final String ACCOUNT_CREATION_SUCCESS ="002";
+    public static final String ACCOUNT_CREATION_SUCCESS = "002";
     public static final String ACCOUNT_CREATION_MESSAGE = "Váš účet byl vytvořen!";
     public static final String ACCOUNT_NOT_EXIST_CODE = "003";
     public static final String ACCOUNT_NOT_EXIST_MESSAGE = "Uživatel s požadovaným číslem účtu neexistuje!";
@@ -20,6 +19,7 @@ public class AccountUtils {
     public static final String ACCOUNT_DEBITED_MESSAGE = "Výběr proběhl úspěšně!";
     public static final String TRANSFER_SUCCESSFUL_CODE = "008";
     public static final String TRANSFER_SUCCESSFUL_MESSAGE = "Převod proběhl úspěsně!";
+
     public static String generateAccountNumber() {
 
         /*

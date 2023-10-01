@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
         User newUser = User.builder()
                 .firstName(userRequest.getFirstName())
                 .lastName(userRequest.getLastName())
-                .anotherName(userRequest.getAnotherName())
+
                 .gander(userRequest.getGander())
                 .address(userRequest.getAddress())
                 .stateOfOrigin(userRequest.getStateOfOrigin())
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
                 .subject("Založení účtu")
                 .messageBody("Skvělá zpráva! Váš účet byl úspěšně vytvořen!\n"
                         + "Detaily účtu: \n" + "Jméno klienta: " + savedUser.getFirstName() + " "
-                        + savedUser.getLastName() + " " + savedUser.getAnotherName() + "\nČíslo účtu: "
+                        + savedUser.getLastName() + " " +  "\nČíslo účtu: "
                         + savedUser.getAccountNumber())
                 .build();
         emailService.sendEmailAlert(emailDetails);
@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
                         .accountBalance(savedUser.getAccountBalance())
                         .accountNumber(savedUser.getAccountNumber())
                         .accountName(savedUser.getFirstName() + " " + savedUser.getLastName() + " "
-                                + savedUser.getAnotherName())
+                                )
                         .build())
                 .build();
     }
@@ -88,8 +88,7 @@ public class UserServiceImpl implements UserService {
                 .accountInfo(AccountInfo.builder()
                         .accountBalance(foundUser.getAccountBalance())
                         .accountNumber(foundUser.getAccountNumber())
-                        .accountName(foundUser.getFirstName() + " " + foundUser.getLastName() + " "
-                                + foundUser.getAnotherName())
+                        .accountName(foundUser.getFirstName() + " " + foundUser.getLastName())
                         .build())
                 .build();
     }
@@ -101,7 +100,7 @@ public class UserServiceImpl implements UserService {
             return AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE;
         }
         User foundUser = userRepository.findByAccountNumber(request.getAccountNumber());
-        return foundUser.getFirstName() + " " + foundUser.getLastName() + " " + foundUser.getAnotherName();
+        return foundUser.getFirstName() + " " + foundUser.getLastName();
     }
 
     @Override
@@ -135,7 +134,7 @@ public class UserServiceImpl implements UserService {
                 .responseCode(AccountUtils.ACCOUNT_CREDITED_SUCCESS)
                 .responseMessage(AccountUtils.ACCOUNT_CREDITED_SUCCESS_MESSAGE)
                 .accountInfo(AccountInfo.builder()
-                        .accountName(userToCredit.getFirstName() + " " + userToCredit.getLastName() + " " + userToCredit.getAnotherName())
+                        .accountName(userToCredit.getFirstName() + " " + userToCredit.getLastName())
                         .accountBalance(userToCredit.getAccountBalance())
                         .accountNumber(request.getAccountNumber())
                         .build())
@@ -144,8 +143,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public BankResponse transfer(TransferRequest request) {
+        boolean isSourceAccountExist = userRepository.existsByAccountNumber(request.getSourceAccountNumber());
         boolean isDestinationAccountExist = userRepository.existsByAccountNumber(request.getDestinationAccountNumber());
-        if (!isDestinationAccountExist) {
+
+        if (!isSourceAccountExist || !isDestinationAccountExist) {
             return BankResponse.builder()
                     .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
                     .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
@@ -154,10 +155,12 @@ public class UserServiceImpl implements UserService {
         }
 
         User sourceAccountUser = userRepository.findByAccountNumber(request.getSourceAccountNumber());
-        String sourceUsername = sourceAccountUser.getFirstName() + " " + sourceAccountUser.getLastName() + " "
-                + sourceAccountUser.getAnotherName();
+        User destinationAccountUser = userRepository.findByAccountNumber(request.getDestinationAccountNumber());
 
-        if (request.getAmount().compareTo(sourceAccountUser.getAccountBalance()) > 0) {
+        BigDecimal amountToTransfer = request.getAmount();
+        BigDecimal sourceAccountBalance = sourceAccountUser.getAccountBalance();
+
+        if (amountToTransfer.compareTo(sourceAccountBalance) > 0) {
             return BankResponse.builder()
                     .responseCode(AccountUtils.INSUFFICIENT_BALANCE_CODE)
                     .responseMessage(AccountUtils.INSUFFICIENT_BALANCE_MESSAGE)
@@ -165,35 +168,21 @@ public class UserServiceImpl implements UserService {
                     .build();
         }
 
-        sourceAccountUser.setAccountBalance(sourceAccountUser.getAccountBalance().subtract(request.getAmount()));
+        // Aktualizujte zůstatek zdrojového účtu
+        sourceAccountUser.setAccountBalance(sourceAccountBalance.subtract(amountToTransfer));
         userRepository.save(sourceAccountUser);
 
-        EmailDetails debitAlert = EmailDetails.builder()
-                .subject("Upozornění na výběr")
-                .recipient(sourceAccountUser.getEmail())
-                .messageBody("Částka " + request.getAmount() + " byla vybrána z vašeho účtu. Váš aktuální zůstatek činí: "
-                        + sourceAccountUser.getAccountBalance())
-                .build();
-        emailService.sendEmailAlert(debitAlert);
-
-        User destinationAccountUser = userRepository.findByAccountNumber(request.getDestinationAccountNumber());
-        destinationAccountUser.setAccountBalance(destinationAccountUser.getAccountBalance().add(request.getAmount()));
+        // Aktualizujte zůstatek cílového účtu
+        BigDecimal destinationAccountBalance = destinationAccountUser.getAccountBalance();
+        destinationAccountUser.setAccountBalance(destinationAccountBalance.add(amountToTransfer));
         userRepository.save(destinationAccountUser);
 
-        EmailDetails creditAlert = EmailDetails.builder()
-                .subject("Upozornění na čerpání")
-                .recipient(destinationAccountUser.getEmail()) // Upravit na email příjemce
-                .messageBody("Částka " + request.getAmount() + " byla načerpána na váš účet od odesilatele: "
-                        + sourceUsername + " Váš aktuální zůstate činí " + destinationAccountUser.getAccountBalance())
-                .build();
-        emailService.sendEmailAlert(creditAlert);
-
+        // Uložte transakci
         TransactionDto transactionDto = TransactionDto.builder()
                 .accountNumber(destinationAccountUser.getAccountNumber())
                 .transactionType("CREDIT")
-                .amount(request.getAmount())
+                .amount(amountToTransfer)
                 .build();
-
         transactionService.saveTransaction(transactionDto, request.getSourceAccountNumber(), request.getDestinationAccountNumber());
 
         return BankResponse.builder()
@@ -206,8 +195,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public BankResponse debitAccount(CreditDebitRequest request) {
-        boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
-        if (!isAccountExist) {
+        // Zkontrolujte, zda účet existuje
+        if (!userRepository.existsByAccountNumber(request.getAccountNumber())) {
             return BankResponse.builder()
                     .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
                     .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
@@ -215,35 +204,35 @@ public class UserServiceImpl implements UserService {
                     .build();
         }
 
-        User userToDebit = userRepository.findByAccountNumber(request.getAccountNumber());
-        BigDecimal availableBalance = userToDebit.getAccountBalance();
+        User accountToDebit = userRepository.findByAccountNumber(request.getAccountNumber());
         BigDecimal debitAmount = request.getAmount();
 
-        if (availableBalance.compareTo(debitAmount) < 0) {
+        // Zkontrolujte, zda má účet dostatečný zůstatek pro provedení debetní transakce
+        if (accountToDebit.getAccountBalance().compareTo(debitAmount) < 0) {
             return BankResponse.builder()
                     .responseCode(AccountUtils.INSUFFICIENT_BALANCE_CODE)
                     .responseMessage(AccountUtils.INSUFFICIENT_BALANCE_MESSAGE)
                     .accountInfo(null)
                     .build();
         } else {
-            userToDebit.setAccountBalance(userToDebit.getAccountBalance().subtract(request.getAmount()));
-            userRepository.save(userToDebit);
+            // Proveďte debetní transakci
+            accountToDebit.setAccountBalance(accountToDebit.getAccountBalance().subtract(debitAmount));
+            userRepository.save(accountToDebit);
 
             TransactionDto transactionDto = TransactionDto.builder()
-                    .accountNumber(userToDebit.getAccountNumber())
+                    .accountNumber(accountToDebit.getAccountNumber())
                     .transactionType("DEBIT")
-                    .amount(request.getAmount())
+                    .amount(debitAmount)
                     .build();
 
-
-            transactionService.saveTransaction(transactionDto,request.getSenderAccount(), request.getReceiverAccount());
+            transactionService.saveTransaction(transactionDto, request.getSenderAccount(), request.getReceiverAccount());
 
             return BankResponse.builder()
                     .responseCode(AccountUtils.ACCOUNT_DEBITED_SUCCESS)
-                    .responseMessage(AccountUtils.ACCOUNT_DEBITED_MESSAGE)
+                    .responseMessage(AccountUtils.ACCOUNT_DEBITED_MESSAGE) // Opravený kód na 008
                     .accountInfo(AccountInfo.builder()
-                            .accountName(userToDebit.getFirstName() + " " + userToDebit.getLastName() + " " + userToDebit.getAnotherName())
-                            .accountBalance(userToDebit.getAccountBalance())
+                            .accountName(accountToDebit.getFirstName() + " " + accountToDebit.getLastName())
+                            .accountBalance(accountToDebit.getAccountBalance())
                             .accountNumber(request.getAccountNumber())
                             .build())
                     .build();

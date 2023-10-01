@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,12 +21,4 @@ public class CreditDebitRequest {
     private String receiverAccount;
 
 
-    public void setSenderAccount(String senderAccount) {
-        this.senderAccount = senderAccount;
-    }
-
-
-    public void setReceiverAccount(String receiverAccount) {
-        this.receiverAccount = receiverAccount;
-    }
 }

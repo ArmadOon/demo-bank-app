@@ -7,6 +7,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,7 +22,6 @@ public class User {
     private Long id;
     private String firstName;
     private String lastName;
-    private String anotherName;
     private String gander;
     private String address;
     private String stateOfOrigin;
@@ -37,6 +37,6 @@ public class User {
     private LocalDateTime modifiedAt;
 
     public String getFullName() {
-        return firstName + " "+ lastName;
+        return firstName + " " + lastName;
     }
 }
