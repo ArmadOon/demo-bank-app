@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -41,13 +42,17 @@ public class BankStatement {
             throws IOException, DocumentException {
         LocalDate start = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
         LocalDate end = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
-        List<Transaction> transactionList = transactionRepository.findByAccountNumberAndCreatedAtBetween(
+
+        List<Transaction> transactionList = transactionRepository.findBySenderAccountAndCreatedAtBetween(
                 accountNumber, start, end);
+
         User user = userRepository.findByAccountNumber(accountNumber);
 
         Document document = createDocument();
+
         OutputStream outputStream = new FileOutputStream(FILE);
         PdfWriter writer = PdfWriter.getInstance(document, outputStream);
+
 
         Image bankLogo = Image.getInstance(BANK_LOGO_PATH);
         bankLogo.setAlignment(Element.ALIGN_CENTER);
@@ -64,11 +69,15 @@ public class BankStatement {
         addPageNumberToFooter(writer);
 
         document.close();
-
         sendStatementByEmail(user.getEmail());
 
         return transactionList;
     }
+
+
+
+
+
 
     private Document createDocument() {
         Rectangle statementSize = new Rectangle(PageSize.A4);
@@ -95,12 +104,18 @@ public class BankStatement {
     }
 
     private PdfPTable createTransactionTable(List<Transaction> transactionList) throws DocumentException {
-        PdfPTable transactionsTable = createTable(4);
+        PdfPTable transactionsTable = createTable(6);
         transactionsTable.setWidthPercentage(100);
-        transactionsTable.setWidths(new float[]{1, 2, 2, 2});
+        transactionsTable.setWidths(new float[]{1, 2, 2, 2, 2, 2});
         transactionsTable.setHorizontalAlignment(Element.ALIGN_CENTER);
         PdfPCell headerCell = createCell("Datum", headerFont, BaseColor.GRAY);
         transactionsTable.addCell(headerCell);
+
+        PdfPCell senderCell = createCell("Odesílatel", headerFont, BaseColor.GRAY);
+        transactionsTable.addCell(senderCell);
+
+        PdfPCell receiverCell = createCell("Příjemce", headerFont, BaseColor.GRAY);
+        transactionsTable.addCell(receiverCell);
 
         PdfPCell statusCell = createCell("Typ", headerFont, BaseColor.GRAY);
         transactionsTable.addCell(statusCell);
@@ -109,12 +124,10 @@ public class BankStatement {
         PdfPCell typeCell = createCell("Status", headerFont, BaseColor.GRAY);
         transactionsTable.addCell(typeCell);
 
-
-
-        // Další buňky pro hlavičku a obsah tabulky...
-
         for (Transaction transaction : transactionList) {
             addCell(transactionsTable, transaction.getCreatedAt().toString(), contentFont, BaseColor.WHITE);
+            addCell(transactionsTable, transaction.getSenderAccount(), contentFont, BaseColor.WHITE);
+            addCell(transactionsTable, transaction.getReceiverAccount(), contentFont, BaseColor.WHITE);
             addCell(transactionsTable, transaction.getTransactionType(), contentFont, BaseColor.WHITE);
             addCell(transactionsTable, transaction.getAmount().toString(), contentFont, BaseColor.WHITE);
             addCell(transactionsTable, transaction.getStatus(), contentFont, BaseColor.WHITE);
@@ -183,9 +196,6 @@ public class BankStatement {
             public void onGenericTag(PdfWriter writer, Document document, Rectangle rect, String text) {
 
             }
-
-
-
         };
 
         writer.setPageEvent(event);
@@ -203,9 +213,8 @@ public class BankStatement {
         return cell;
     }
 
-    // Přetížená metoda createCell bez parametru pro padding
     private PdfPCell createCell(String text, Font font, BaseColor backgroundColor) {
-        return createCell(text, font, backgroundColor, 2f);  // Nastavení paddingu na 2f
+        return createCell(text, font, backgroundColor, 2f);
     }
 
     private void addCell(PdfPTable table, String text, Font font, BaseColor backgroundColor) {
@@ -213,16 +222,13 @@ public class BankStatement {
     }
 
     private void sendStatementByEmail(String recipientEmail)  {
-
-            EmailDetails emailDetails = EmailDetails.builder()
-                    .recipient(recipientEmail)
-                    .subject("VÝPIS ÚČTU")
-                    .messageBody("Váš požadovaný výpis účtu je v příloze!")
-                    .attachment(FILE)
-                    .build();
-            emailService.sendEmailWithAttachment(emailDetails);
-
-
-
+        EmailDetails emailDetails = EmailDetails.builder()
+                .recipient(recipientEmail)
+                .subject("VÝPIS ÚČTU")
+                .messageBody("Váš požadovaný výpis účtu je v příloze!")
+                .attachment(FILE)
+                .build();
+        emailService.sendEmailWithAttachment(emailDetails);
     }
 }
+

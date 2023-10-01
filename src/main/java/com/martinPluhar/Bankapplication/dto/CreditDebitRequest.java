@@ -1,9 +1,6 @@
 package com.martinPluhar.Bankapplication.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.math.BigDecimal;
@@ -15,4 +12,20 @@ public class CreditDebitRequest {
 
     private String accountNumber;
     private BigDecimal amount;
+
+    @Getter
+    private String senderAccount;
+
+    @Getter
+    private String receiverAccount;
+
+
+    public void setSenderAccount(String senderAccount) {
+        this.senderAccount = senderAccount;
+    }
+
+
+    public void setReceiverAccount(String receiverAccount) {
+        this.receiverAccount = receiverAccount;
+    }
 }

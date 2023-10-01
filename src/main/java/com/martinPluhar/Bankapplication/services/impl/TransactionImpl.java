@@ -10,26 +10,33 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 @Component
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class TransactionImpl implements TransactionService {
 
     @Autowired
-    TransactionRepository transactionRepository;
+    private TransactionRepository transactionRepository;
+
     @Override
-    public void saveTransaction(TransactionDto transactionDto) {
+    public void saveTransaction(TransactionDto transactionDto, String senderAccount, String receiverAccount) {
+
         Transaction transaction = Transaction.builder()
                 .transactionType(transactionDto.getTransactionType())
-                .accountNumber(transactionDto.getAccountNumber())
                 .amount(transactionDto.getAmount())
+                .senderAccount(senderAccount)
+                .receiverAccount(receiverAccount)
                 .status("SUCCESS")
                 .build();
         transactionRepository.save(transaction);
-        System.out.println("Transakce byla uložena!");
+
+
     }
 }
+
+
+

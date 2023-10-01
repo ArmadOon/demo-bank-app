@@ -7,7 +7,7 @@ public class AccountUtils {
     public static final String ACCOUNT_EXIST_MESSAGE = "Tento účet již existuje!";
 
     public static final String ACCOUNT_CREATION_SUCCESS ="002";
-    public static final String ACCOUNT_CREATION_MESSAGE = "Váš účet byl v pořádku vytvořen!";
+    public static final String ACCOUNT_CREATION_MESSAGE = "Váš účet byl vytvořen!";
     public static final String ACCOUNT_NOT_EXIST_CODE = "003";
     public static final String ACCOUNT_NOT_EXIST_MESSAGE = "Uživatel s požadovaným číslem účtu neexistuje!";
     public static final String ACCOUNT_FOUND_CODE = "004";
@@ -17,7 +17,7 @@ public class AccountUtils {
     public static final String INSUFFICIENT_BALANCE_CODE = "006";
     public static final String INSUFFICIENT_BALANCE_MESSAGE = "Nedostatečný zůstatek!";
     public static final String ACCOUNT_DEBITED_SUCCESS = "007";
-    public static final String ACCOUNT_DEBITED_MESSAGE = "Účet byl v pořádku debitován!";
+    public static final String ACCOUNT_DEBITED_MESSAGE = "Výběr proběhl úspěšně!";
     public static final String TRANSFER_SUCCESSFUL_CODE = "008";
     public static final String TRANSFER_SUCCESSFUL_MESSAGE = "Převod proběhl úspěsně!";
     public static String generateAccountNumber() {
