@@ -7,6 +7,7 @@ import com.martinPluhar.Bankapplication.services.intfc.EmailService;
 import com.martinPluhar.Bankapplication.services.intfc.TransactionService;
 import com.martinPluhar.Bankapplication.services.intfc.UserService;
 import com.martinPluhar.Bankapplication.util.AccountUtils;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -68,6 +69,21 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    @Transactional
+    public BankResponse deleteAccountByEmail(String email) {
+
+        if(userRepository.existsByEmail(email)){
+            userRepository.deleteAccountByEmail(email);
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_DELETED_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_DELETED_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+        }
+        else{
+            throw new RuntimeException("Uživatel s e-mailem " + email + " nebyl nalezen.");
+        }
+    }
 
 
     /**

@@ -1,18 +1,22 @@
 package com.martinPluhar.Bankapplication.controllers;
 
 import com.martinPluhar.Bankapplication.dto.*;
+import com.martinPluhar.Bankapplication.repository.UserRepository;
 import com.martinPluhar.Bankapplication.services.intfc.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 @Tag(name = "Client management APIs")
 @RestController
 @RequestMapping("/api/user")
 public class ClientController {
     @Autowired
     UserService userService;
+    UserRepository userRepository;
+
     @Operation(
             summary = "Create new client account",
             description = "Creating new client and assign account id and generate random account number"
@@ -23,7 +27,7 @@ public class ClientController {
 
     )
     @PostMapping
-    public BankResponse createAccount(@RequestBody UserRequest userRequest){
+    public BankResponse createAccount(@RequestBody UserRequest userRequest) {
         return userService.createAccount(userRequest);
     }
 
@@ -37,24 +41,32 @@ public class ClientController {
 
     )
     @GetMapping("balanceEnquiry")
-    public BankResponse balanceEnquiry(@RequestBody EnquiryRequest request){
+    public BankResponse balanceEnquiry(@RequestBody EnquiryRequest request) {
         return userService.balanceEnquiry(request);
     }
+
     @GetMapping("nameEnquiry")
-    public String nameEnquiry(@RequestBody EnquiryRequest request){
+    public String nameEnquiry(@RequestBody EnquiryRequest request) {
         return userService.nameEnquiry(request);
     }
+
     @PostMapping("credit")
-    public BankResponse creditAccount(@RequestBody CreditDebitRequest request){
+    public BankResponse creditAccount(@RequestBody CreditDebitRequest request) {
         return userService.creditAccount(request);
     }
+
     @PostMapping("debit")
-    public BankResponse debitAccount(@RequestBody CreditDebitRequest request){
+    public BankResponse debitAccount(@RequestBody CreditDebitRequest request) {
         return userService.debitAccount(request);
     }
 
     @PostMapping("transfer")
-    public BankResponse transfer(@RequestBody TransferRequest request){
+    public BankResponse transfer(@RequestBody TransferRequest request) {
         return userService.transfer(request);
+    }
+    @DeleteMapping("delete")
+    public BankResponse deleteAccountByEmail(@RequestParam String email) {
+        return userService.deleteAccountByEmail(email);
+
     }
 }

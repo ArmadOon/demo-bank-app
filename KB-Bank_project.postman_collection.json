@@ -1,0 +1,662 @@
+{
+	"info": {
+		"_postman_id": "43f53ab7-b024-4928-a7ff-6c38963fa17f",
+		"name": "KB-Bank_project",
+		"description": "``` markdown\n# Demo Bank for KB job apply \n# DescriptionThis is a small banking demo application for applying for a job at KB bank.\n# Requirements\n* Java Development kit (JDK 17)\n* Apache Maven\n* My-SQL*\n Postman\n# Functions\n* Register a user\n* Performing transactions between accounts\n* Displaying transaction history.\n* Credit account\n* Debit Account\n* Email alert\n* Get statement via email or download it\n# Launch\n1. Clone application```https://github.com/ArmadOon/demo-bank-app.git```\n2. Create and setup application properties\ndatabasespring.datasource.url=jdbc:mysql://localhost:3306/yourdb\nspring.datasource.username=root\nspring.datasource.password=yourpw\nspring.datasource.drive-class-name=com.mysql.cj.jdbc.Driver\nspring.jpa.hibernate.ddl-auto=update\nspring.jpa.database=mysql\nspring.mail.host=smtp.gmail.com\nspring.mail.port=465\nspring.mail.username=yourmail\nspring.mail.password=yourpw\nspring.mail.properties.mail.smtp.auth=true\nspring.mail.properties.mail.smtp.starttls.enable=true\nspring.mail.properties.mail.smtp.ssl.enable=true\n\n ```\n\n```\n3. Run app\n4. Run collections from postman\n\n ```",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "20977599"
+	},
+	"item": [
+		{
+			"name": "Create account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.responseCode).to.exist.and.to.be.a('string');",
+							"    pm.expect(responseData.responseMessage).to.exist.and.to.be.a('string');",
+							"    pm.expect(responseData.accountInfo).to.exist;",
+							"});",
+							"",
+							"",
+							"pm.test(\"responseCode should be a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.responseCode).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response message is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.responseMessage).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"accountInfo should be null\", function () {",
+							"    const responseData = pm.response.json();",
+							"",
+							"    pm.expect(responseData.accountInfo).to.be.null;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"Martin\",\n    \"lastName\": \"Pluhař\",\n    \"gander\": \"male\",\n    \"address\": \"Komenskeho 1507, Nachod, 54701\",\n    \"stateOfOrigin\": \"czech\",\n    \"accountBalance\": 1000,\n    \"email\":\"pluhar.martin93@gmail.com\",\n    \"phoneNumber\": \"111111111\",\n    \"alternativePhoneNumber\": \"222222222\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/user"
+			},
+			"response": []
+		},
+		{
+			"name": "Create second account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has required fields\", function () {",
+							"  const responseData = pm.response.json();",
+							"  ",
+							"  pm.expect(responseData).to.be.an('object');",
+							"  pm.expect(responseData).to.have.property('responseCode');",
+							"  pm.expect(responseData).to.have.property('responseMessage');",
+							"  pm.expect(responseData).to.have.property('accountInfo');",
+							"});",
+							"",
+							"",
+							"pm.test(\"ResponseCode is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.responseCode).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"ResponseMessage is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.responseMessage).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"AccountInfo should be null\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.accountInfo).to.be.null;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"Kristýna\",\n    \"lastName\": \"Chrastilová\",\n    \"gander\": \"female\",\n    \"address\": \"Komenskeho 1507, Nachod, 54701\",\n    \"stateOfOrigin\": \"czech\",\n    \"accountBalance\": 1000,\n    \"email\":\"chrasdsadsdasdtilova@gmail.com\",\n    \"phoneNumber\": \"111111111\",\n    \"alternativePhoneNumber\": \"222222222\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/user"
+			},
+			"response": []
+		},
+		{
+			"name": "Credit funding",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has the required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.responseCode).to.exist;",
+							"    pm.expect(responseData.responseMessage).to.exist;",
+							"    pm.expect(responseData.accountInfo).to.exist;",
+							"});",
+							"",
+							"",
+							"pm.test(\"Account name is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.accountInfo).to.exist.and.to.be.an('object');",
+							"    pm.expect(responseData.accountInfo.accountName).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Account name should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Account balance is a non-negative number\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.accountInfo).to.exist;",
+							"    pm.expect(responseData.accountInfo.accountBalance).to.be.a('number').and.to.be.at.least(0);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Account number is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.accountInfo.accountNumber).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Account number should not be empty\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"amount\": 100000,\n    \"accountNumber\": \"2023431660/0100\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/user/credit"
+			},
+			"response": []
+		},
+		{
+			"name": "Debit withdreaw amount",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has the required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.responseCode).to.exist;",
+							"    pm.expect(responseData.responseMessage).to.exist;",
+							"    pm.expect(responseData.accountInfo).to.exist;",
+							"});",
+							"",
+							"",
+							"pm.test(\"ResponseCode is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.responseCode).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"ResponseMessage is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"",
+							"    pm.expect(responseData.responseMessage).to.be.a('string').and.to.have.lengthOf.at.least(1, \"ResponseMessage should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"AccountInfo should be null\", function () {",
+							"  const responseData = pm.response.json();",
+							"",
+							"  pm.expect(responseData).to.be.an('object');",
+							"  pm.expect(responseData.accountInfo).to.be.null;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"amount\": 5000,\n    \"accountNumber\": \"2023431660/0100\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/user/debit"
+			},
+			"response": []
+		},
+		{
+			"name": "Transfer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has the required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.responseCode).to.exist.and.to.be.a('string');",
+							"    pm.expect(responseData.responseMessage).to.exist.and.to.be.a('string');",
+							"    pm.expect(responseData.accountInfo).to.exist;",
+							"});",
+							"",
+							"",
+							"pm.test(\"Validate that the 'responseCode' is a non-empty string\", function () {",
+							"  const responseData = pm.response.json();",
+							"  ",
+							"  pm.expect(responseData.responseCode).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response message is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.responseMessage).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Verify that accountInfo is null\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.accountInfo).to.be.null;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sourceAccountNumber\": \"2023431660/0100\",\n    \"destinationAccountNumber\": \"2023212798/0100\",\n    \"amount\": 3000\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/user/transfer"
+			},
+			"response": []
+		},
+		{
+			"name": "Credit funding wrong data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.responseCode).to.exist;",
+							"    pm.expect(responseData.responseMessage).to.exist;",
+							"    pm.expect(responseData.accountInfo).to.exist;",
+							"});",
+							"",
+							"",
+							"pm.test(\"responseCode is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.responseCode).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"responseMessage is a non-empty string\", function () {",
+							"  const responseData = pm.response.json();",
+							"  ",
+							"  pm.expect(responseData.responseMessage).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"accountInfo should be null\", function () {",
+							"  const responseData = pm.response.json();",
+							"",
+							"  pm.expect(responseData.accountInfo).to.be.null;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"amount\": 10000,\n    \"accountNumber\": \"2023171120/0100\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/user/credit"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Balance Enquiry",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has the required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData).to.have.property('responseCode');",
+							"    pm.expect(responseData).to.have.property('responseMessage');",
+							"    pm.expect(responseData).to.have.property('accountInfo');",
+							"});",
+							"",
+							"",
+							"pm.test(\"responseCode is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.responseCode).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response message is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"",
+							"    pm.expect(responseData.responseMessage).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"accountInfo should be null\", function () {",
+							"    const responseData = pm.response.json();",
+							"",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.accountInfo).to.be.null;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"accountNumber\": \"2023441603/0100\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/user/balanceEnquiry"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Balance Enquiry Wrong data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"  pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has the required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData).to.include.keys('responseCode', 'responseMessage', 'accountInfo');",
+							"});",
+							"",
+							"",
+							"pm.test(\"ResponseCode is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.responseCode).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"ResponseMessage is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.responseMessage).to.be.a('string').and.to.have.lengthOf.at.least(1, \"ResponseMessage should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"AccountInfo should be null\", function () {",
+							"  const responseData = pm.response.json();",
+							"",
+							"  pm.expect(responseData.accountInfo).to.be.null;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"accountNumber\": \"2023171120/0100\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/user/balanceEnquiry"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Name Enquiry",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"accountNumber\": \"2023171129/0100\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/user/nameEnquiry"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Name Enquiry wrong data",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"accountNumber\": \"2023171120/0100\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/user/nameEnquiry"
+			},
+			"response": []
+		},
+		{
+			"name": "Statement",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response is an array with at least one element\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('array').that.is.not.empty;",
+							"});",
+							"",
+							"",
+							"pm.test(\"Amount is a non-negative number\", function () {",
+							"    const responseData = pm.response.json();",
+							"",
+							"    pm.expect(responseData).to.be.an('array');",
+							"",
+							"    responseData.forEach(function (transaction) {",
+							"        pm.expect(transaction.amount).to.exist.and.to.be.a('number').and.to.be.at.least(0);",
+							"    });",
+							"});",
+							"",
+							"",
+							"pm.test(\"createdAt and modifiedAt are in a valid date format\", function () {",
+							"  const responseData = pm.response.json();",
+							"  ",
+							"  pm.expect(responseData).to.be.an('array').that.is.not.empty;",
+							"  ",
+							"  responseData.forEach(function(transaction) {",
+							"    pm.expect(transaction.createdAt).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+							"    pm.expect(transaction.modifiedAt).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+							"  });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/bankStatement?accountNumber=2023431660/0100&startDate=2023-10-05&endDate=2023-10-05",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"bankStatement"
+					],
+					"query": [
+						{
+							"key": "accountNumber",
+							"value": "2023431660/0100"
+						},
+						{
+							"key": "startDate",
+							"value": "2023-10-05"
+						},
+						{
+							"key": "endDate",
+							"value": "2023-10-05"
+						}
+					]
+				},
+				"description": "First need to make few transactipms and then enquiry statement from current date"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User by email",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/user/delete?email=pluhar.martin93@gmail.com",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"user",
+						"delete"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "pluhar.martin93@gmail.com"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

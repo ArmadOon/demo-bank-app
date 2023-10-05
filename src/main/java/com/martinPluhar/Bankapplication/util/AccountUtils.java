@@ -19,6 +19,8 @@ public class AccountUtils {
     public static final String ACCOUNT_DEBITED_MESSAGE = "Výběr proběhl úspěšně!";
     public static final String TRANSFER_SUCCESSFUL_CODE = "008";
     public static final String TRANSFER_SUCCESSFUL_MESSAGE = "Převod proběhl úspěsně!";
+    public static final String ACCOUNT_DELETED_CODE = "009";
+    public static final String ACCOUNT_DELETED_MESSAGE = "Účet byl smazán";
 
     /**
      * Generuje náhodné číslo účtu ve formátu: "YYYYNNNNNN/XXXX", kde:
