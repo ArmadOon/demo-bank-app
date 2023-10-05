@@ -12,6 +12,7 @@ This is a small banking demo application for applying for a job at KB bank.
 
 # Functions
 * Register a user
+* Delete a user
 * Performing transactions between accounts
 * Displaying transaction history.
 * Credit account
@@ -46,5 +47,9 @@ spring.mail.properties.mail.smtp.starttls.enable=true
 spring.mail.properties.mail.smtp.ssl.enable=true
 ```
 3. Run app
-4. Run collections from postman
+4. Make 2 account
+5. Fund accounts
+6. Withdraw money
+7. Transfer money to second account
+8. Get statement
 
