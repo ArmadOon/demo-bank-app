@@ -45,7 +45,6 @@ public class UserServiceImpl implements UserService {
         User newUser = User.builder()
                 .firstName(userRequest.getFirstName())
                 .lastName(userRequest.getLastName())
-
                 .gander(userRequest.getGander())
                 .address(userRequest.getAddress())
                 .stateOfOrigin(userRequest.getStateOfOrigin())
@@ -58,26 +57,18 @@ public class UserServiceImpl implements UserService {
                 .build();
         User savedUser = userRepository.save(newUser);
 
-        EmailDetails emailDetails = EmailDetails.builder()
-                .recipient(savedUser.getEmail())
-                .subject("Založení účtu")
-                .messageBody("Skvělá zpráva! Váš účet byl úspěšně vytvořen!\n"
-                        + "Detaily účtu: \n" + "Jméno klienta: " + savedUser.getFirstName() + " "
-                        + savedUser.getLastName() + " " + "\nČíslo účtu: "
-                        + savedUser.getAccountNumber())
-                .build();
-        emailService.sendEmailAlert(emailDetails);
         return BankResponse.builder()
                 .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
                 .responseMessage(AccountUtils.ACCOUNT_CREATION_MESSAGE)
                 .accountInfo(AccountInfo.builder()
                         .accountBalance(savedUser.getAccountBalance())
                         .accountNumber(savedUser.getAccountNumber())
-                        .accountName(savedUser.getFirstName() + " " + savedUser.getLastName() + " "
-                        )
+                        .accountName(savedUser.getFirstName() + " " + savedUser.getLastName())
                         .build())
                 .build();
     }
+
+
 
     /**
      * Získá aktuální zůstatek bankovního účtu na základě čísla účtu.
@@ -276,4 +267,5 @@ public class UserServiceImpl implements UserService {
                     .build();
         }
     }
+
 }
