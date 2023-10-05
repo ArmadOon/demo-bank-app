@@ -20,25 +20,33 @@ public class AccountUtils {
     public static final String TRANSFER_SUCCESSFUL_CODE = "008";
     public static final String TRANSFER_SUCCESSFUL_MESSAGE = "Převod proběhl úspěsně!";
 
+    /**
+     * Generuje náhodné číslo účtu ve formátu: "YYYYNNNNNN/XXXX", kde:
+     * - YYYY je aktuální rok
+     * - NNNNNN je náhodně vygenerované šestimístné číslo
+     * - XXXX je kód banky
+     *
+     * @return Vygenerované číslo účtu
+     */
     public static String generateAccountNumber() {
-
-        /*
-          2023 + random six digits + bank code
-          example "202312878/0100"
-         */
-
+        // Získání aktuálního roku
         Year currentYear = Year.now();
+
+        // Definice minimálního a maximálního rozsahu pro generování náhodného čísla
         int min = 100000;
         int max = 999999;
+
+        // Kód banky
         String bankCode = "/0100";
-        //* generate a random number between mind and max
 
+        // Generování náhodného čísla v zadaném rozsahu
         int randNumber = (int) Math.floor(Math.random() * (max - min + 1) + min);
-        //* convert the current and randomNumber to strings, then concatenate
 
+        // Převedení aktuálního roku a náhodného čísla na textový řetězec
         String year = String.valueOf(currentYear);
         String randomNumber = String.valueOf(randNumber);
 
+        // Sestavení celého čísla účtu a jeho návrat
         return year + randomNumber + bankCode;
     }
 }
