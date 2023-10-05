@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
-
+/**
+ * Služba pro správu uživatelských účtů a bankovních transakcí.
+ */
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -25,6 +27,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private TransactionService transactionService;
 
+    /**
+     * Vytvoří nový bankovní účet pro zadaného uživatele na základě požadavku.
+     *
+     * @param userRequest Požadavek na vytvoření účtu obsahující informace o uživateli.
+     * @return Odpověď od banky, která obsahuje informace o vytvořeném účtu nebo chybovou zprávu.
+     */
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
         if (userRepository.existsByEmail(userRequest.getEmail())) {
@@ -55,7 +63,7 @@ public class UserServiceImpl implements UserService {
                 .subject("Založení účtu")
                 .messageBody("Skvělá zpráva! Váš účet byl úspěšně vytvořen!\n"
                         + "Detaily účtu: \n" + "Jméno klienta: " + savedUser.getFirstName() + " "
-                        + savedUser.getLastName() + " " +  "\nČíslo účtu: "
+                        + savedUser.getLastName() + " " + "\nČíslo účtu: "
                         + savedUser.getAccountNumber())
                 .build();
         emailService.sendEmailAlert(emailDetails);
@@ -66,11 +74,17 @@ public class UserServiceImpl implements UserService {
                         .accountBalance(savedUser.getAccountBalance())
                         .accountNumber(savedUser.getAccountNumber())
                         .accountName(savedUser.getFirstName() + " " + savedUser.getLastName() + " "
-                                )
+                        )
                         .build())
                 .build();
     }
 
+    /**
+     * Získá aktuální zůstatek bankovního účtu na základě čísla účtu.
+     *
+     * @param request Požadavek na získání zůstatku obsahující číslo účtu.
+     * @return Odpověď od banky, která obsahuje aktuální zůstatek nebo chybovou zprávu.
+     */
     @Override
     public BankResponse balanceEnquiry(EnquiryRequest request) {
         boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
@@ -93,6 +107,12 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    /**
+     * Získá jméno uživatele na základě čísla účtu.
+     *
+     * @param request Požadavek na získání jména obsahující číslo účtu.
+     * @return Jméno uživatele nebo chybovou zprávu, pokud účet neexistuje.
+     */
     @Override
     public String nameEnquiry(EnquiryRequest request) {
         boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
@@ -103,6 +123,12 @@ public class UserServiceImpl implements UserService {
         return foundUser.getFirstName() + " " + foundUser.getLastName();
     }
 
+    /**
+     * Připíše zadanou částku na bankovní účet na základě požadavku.
+     *
+     * @param request Požadavek na připsání částky na účet.
+     * @return Odpověď od banky, která obsahuje aktualizovaný zůstatek nebo chybovou zprávu.
+     */
     @Override
     public BankResponse creditAccount(CreditDebitRequest request) {
         boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
@@ -141,6 +167,12 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    /**
+     * Provádí bankovní převod mezi dvěma účty na základě požadavku.
+     *
+     * @param request Požadavek na bankovní převod mezi účty.
+     * @return Odpověď od banky, která obsahuje informace o provedeném převodu nebo chybovou zprávu.
+     */
     @Override
     public BankResponse transfer(TransferRequest request) {
         boolean isSourceAccountExist = userRepository.existsByAccountNumber(request.getSourceAccountNumber());
@@ -168,16 +200,16 @@ public class UserServiceImpl implements UserService {
                     .build();
         }
 
-        // Aktualizujte zůstatek zdrojového účtu
+        // Aktualizuje zůstatek zdrojového účtu
         sourceAccountUser.setAccountBalance(sourceAccountBalance.subtract(amountToTransfer));
         userRepository.save(sourceAccountUser);
 
-        // Aktualizujte zůstatek cílového účtu
+        // Aktualizuje zůstatek cílového účtu
         BigDecimal destinationAccountBalance = destinationAccountUser.getAccountBalance();
         destinationAccountUser.setAccountBalance(destinationAccountBalance.add(amountToTransfer));
         userRepository.save(destinationAccountUser);
 
-        // Uložte transakci
+        // Uloží transakci
         TransactionDto transactionDto = TransactionDto.builder()
                 .accountNumber(destinationAccountUser.getAccountNumber())
                 .transactionType("CREDIT")
@@ -193,9 +225,15 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    /**
+     * Debetuje zadanou částku z bankovního účtu na základě požadavku.
+     *
+     * @param request Požadavek na debetaci částky z účtu.
+     * @return Odpověď od banky, která obsahuje aktualizovaný zůstatek nebo chybovou zprávu.
+     */
     @Override
     public BankResponse debitAccount(CreditDebitRequest request) {
-        // Zkontrolujte, zda účet existuje
+        // Zkontroluje, zda účet existuje
         if (!userRepository.existsByAccountNumber(request.getAccountNumber())) {
             return BankResponse.builder()
                     .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
@@ -207,7 +245,7 @@ public class UserServiceImpl implements UserService {
         User accountToDebit = userRepository.findByAccountNumber(request.getAccountNumber());
         BigDecimal debitAmount = request.getAmount();
 
-        // Zkontrolujte, zda má účet dostatečný zůstatek pro provedení debetní transakce
+        // Zkontroluje, zda má účet dostatečný zůstatek pro provedení debetní transakce
         if (accountToDebit.getAccountBalance().compareTo(debitAmount) < 0) {
             return BankResponse.builder()
                     .responseCode(AccountUtils.INSUFFICIENT_BALANCE_CODE)
@@ -215,7 +253,7 @@ public class UserServiceImpl implements UserService {
                     .accountInfo(null)
                     .build();
         } else {
-            // Proveďte debetní transakci
+            // Provede debetní transakci
             accountToDebit.setAccountBalance(accountToDebit.getAccountBalance().subtract(debitAmount));
             userRepository.save(accountToDebit);
 
@@ -229,7 +267,7 @@ public class UserServiceImpl implements UserService {
 
             return BankResponse.builder()
                     .responseCode(AccountUtils.ACCOUNT_DEBITED_SUCCESS)
-                    .responseMessage(AccountUtils.ACCOUNT_DEBITED_MESSAGE) // Opravený kód na 008
+                    .responseMessage(AccountUtils.ACCOUNT_DEBITED_MESSAGE)
                     .accountInfo(AccountInfo.builder()
                             .accountName(accountToDebit.getFirstName() + " " + accountToDebit.getLastName())
                             .accountBalance(accountToDebit.getAccountBalance())
