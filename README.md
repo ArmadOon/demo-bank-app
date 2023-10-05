@@ -27,13 +27,16 @@ https://github.com/ArmadOon/demo-bank-app.git
 2. Create and setup application properties
 ```
 //you need to set mysql database
+
 spring.datasource.url=jdbc:mysql://localhost:3306/yourdb
 spring.datasource.username=root
 spring.datasource.password=yourpw
 spring.datasource.drive-class-name=com.mysql.cj.jdbc.Driver
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.database=mysql
-//email setuo
+
+//email setup
+
 spring.mail.host=smtp.gmail.com
 spring.mail.port=465
 spring.mail.username=yourmail
