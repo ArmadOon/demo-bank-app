@@ -30,6 +30,7 @@ public class User {
     private String alternativePhoneNumber;
     private String accountNumber;
     private BigDecimal accountBalance;
+    private String password;
     private String status;
     @CreationTimestamp
     private LocalDateTime createdAt;
