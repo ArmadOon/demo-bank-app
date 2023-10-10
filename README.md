@@ -47,9 +47,11 @@ spring.mail.properties.mail.smtp.starttls.enable=true
 spring.mail.properties.mail.smtp.ssl.enable=true
 ```
 3. Run app
-4. Make 2 account
-5. Fund accounts
-6. Withdraw money
-7. Transfer money to second account
-8. Get statement
+4. Copy password
+5. Paste password to Authentication collection
+6. Make 2 account
+7. Fund accounts
+8. Withdraw money
+9. Transfer money to second account
+10. Get statement
 
