@@ -45,6 +45,9 @@ spring.mail.password=yourpw
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 spring.mail.properties.mail.smtp.ssl.enable=true
+
+app.jwt-secret=xjgnNP/MGwkVllA/fR+NGRZtrQQnyyRhOaMfR4OwomZNA6ovrdnG4uQor9uYBfvX
+app.jwt-expiration=86400000
 ```
 3. Run app
 4. Copy password
