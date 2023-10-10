@@ -8,7 +8,10 @@ import com.martinPluhar.Bankapplication.services.intfc.TransactionService;
 import com.martinPluhar.Bankapplication.services.intfc.UserService;
 import com.martinPluhar.Bankapplication.util.AccountUtils;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,6 +20,7 @@ import java.math.BigDecimal;
  * Služba pro správu uživatelských účtů a bankovních transakcí.
  */
 @Service
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
     @Autowired
@@ -27,6 +31,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     /**
      * Vytvoří nový bankovní účet pro zadaného uživatele na základě požadavku.
@@ -52,6 +59,7 @@ public class UserServiceImpl implements UserService {
                 .accountNumber(AccountUtils.generateAccountNumber())
                 .accountBalance(BigDecimal.ZERO)
                 .email(userRequest.getEmail())
+                .password(passwordEncoder.encode(userRequest.getPassword()))
                 .phoneNumber(userRequest.getPhoneNumber())
                 .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
                 .status("Aktivní")
@@ -72,15 +80,14 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public BankResponse deleteAccountByEmail(String email) {
 
-        if(userRepository.existsByEmail(email)){
+        if (userRepository.existsByEmail(email)) {
             userRepository.deleteAccountByEmail(email);
             return BankResponse.builder()
                     .responseCode(AccountUtils.ACCOUNT_DELETED_CODE)
                     .responseMessage(AccountUtils.ACCOUNT_DELETED_MESSAGE)
                     .accountInfo(null)
                     .build();
-        }
-        else{
+        } else {
             throw new RuntimeException("Uživatel s e-mailem " + email + " nebyl nalezen.");
         }
     }
@@ -283,5 +290,7 @@ public class UserServiceImpl implements UserService {
                     .build();
         }
     }
+
+
 
 }
