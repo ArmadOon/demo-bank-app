@@ -31,6 +31,12 @@ public class ClientController {
         return userService.createAccount(userRequest);
     }
 
+    @PostMapping("/login")
+    public BankResponse login(@RequestBody LoginDto loginDto){
+
+        return userService.login(loginDto);
+    }
+
     @Operation(
             summary = "Balance Enquiry",
             description = "Given an account number "
@@ -64,6 +70,7 @@ public class ClientController {
     public BankResponse transfer(@RequestBody TransferRequest request) {
         return userService.transfer(request);
     }
+
     @DeleteMapping("delete")
     public BankResponse deleteAccountByEmail(@RequestParam String email) {
         return userService.deleteAccountByEmail(email);

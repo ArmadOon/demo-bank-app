@@ -1,6 +1,8 @@
 package com.martinPluhar.Bankapplication.services.impl;
 
+import com.martinPluhar.Bankapplication.config.JwtTokenProvider;
 import com.martinPluhar.Bankapplication.dto.*;
+import com.martinPluhar.Bankapplication.entity.Role;
 import com.martinPluhar.Bankapplication.entity.User;
 import com.martinPluhar.Bankapplication.repository.UserRepository;
 import com.martinPluhar.Bankapplication.services.intfc.EmailService;
@@ -11,6 +13,10 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +41,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
     /**
      * Vytvoří nový bankovní účet pro zadaného uživatele na základě požadavku.
      *
@@ -50,6 +62,7 @@ public class UserServiceImpl implements UserService {
                     .accountInfo(null)
                     .build();
         }
+        Role userRole = Role.valueOf(String.valueOf(userRequest.getRole()));
         User newUser = User.builder()
                 .firstName(userRequest.getFirstName())
                 .lastName(userRequest.getLastName())
@@ -62,6 +75,7 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(userRequest.getPassword()))
                 .phoneNumber(userRequest.getPhoneNumber())
                 .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
+                .role(String.valueOf(userRole))
                 .status("Aktivní")
                 .build();
         User savedUser = userRepository.save(newUser);
@@ -76,8 +90,28 @@ public class UserServiceImpl implements UserService {
                         .build())
                 .build();
     }
+    public BankResponse login(LoginDto loginDto){
+        Authentication authentication = null;
+        authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
+        );
 
+        EmailDetails loginAlert = EmailDetails.builder()
+                .subject("Přihlášení")
+                .recipient(loginDto.getEmail())
+                .messageBody("Úspěšně jste se přihlásil ke svému účtu. Pokud jste se vědomně nepřihlásil, prosím kontaktujte banku!")
+                .build();
+
+        emailService.sendEmailAlert(loginAlert);
+
+        return BankResponse.builder()
+                .responseCode(AccountUtils.ACCOUNT_LOGIN_SUCCES)
+                .responseMessage(jwtTokenProvider.generateToken(authentication))
+                .accountInfo(null)
+                .build();
+    }
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')") // Může provádět jen token s autorizací ADMIN
     public BankResponse deleteAccountByEmail(String email) {
 
         if (userRepository.existsByEmail(email)) {

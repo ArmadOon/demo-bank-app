@@ -22,6 +22,8 @@ public class AccountUtils {
     public static final String ACCOUNT_DELETED_CODE = "009";
     public static final String ACCOUNT_DELETED_MESSAGE = "Účet byl smazán";
 
+    public static final String ACCOUNT_LOGIN_SUCCES = "Úspěšné přihlášení";
+
     /**
      * Generuje náhodné číslo účtu ve formátu: "YYYYNNNNNN/XXXX", kde:
      * - YYYY je aktuální rok

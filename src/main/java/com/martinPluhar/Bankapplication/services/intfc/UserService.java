@@ -11,4 +11,5 @@ public interface UserService {
     BankResponse debitAccount(CreditDebitRequest request);
     BankResponse transfer(TransferRequest request);
     BankResponse deleteAccountByEmail(String email);
+    BankResponse login(LoginDto loginDto);
 }

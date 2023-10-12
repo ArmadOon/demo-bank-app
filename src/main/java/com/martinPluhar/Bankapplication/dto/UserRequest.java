@@ -1,5 +1,6 @@
 package com.martinPluhar.Bankapplication.dto;
 
+import com.martinPluhar.Bankapplication.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserRequest {
+    private String role;
     private String firstName;
     private String lastName;
     private String anotherName;
