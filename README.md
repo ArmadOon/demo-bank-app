@@ -51,7 +51,7 @@ app.jwt-expiration=86400000
 ```
 3. Run app
 4. Copy password
-5. Paste password to Authentication collection
+5. Paste token to Authentication collection
 6. Make 2 account
 7. Fund accounts
 8. Withdraw money
