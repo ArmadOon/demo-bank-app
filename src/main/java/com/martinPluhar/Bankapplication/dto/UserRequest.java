@@ -1,6 +1,5 @@
 package com.martinPluhar.Bankapplication.dto;
 
-import com.martinPluhar.Bankapplication.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
