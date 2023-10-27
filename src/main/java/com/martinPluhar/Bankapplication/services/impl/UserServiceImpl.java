@@ -79,6 +79,15 @@ public class UserServiceImpl implements UserService {
                 .status("Aktivní")
                 .build();
         User savedUser = userRepository.save(newUser);
+        EmailDetails createAccountAlert = EmailDetails.builder()
+                .subject("Registrace účtu")
+                .recipient(userRequest.getEmail())
+                .messageBody("""
+                        Dobrý den,
+                        Moc děkujeme za vaši registraci a těšíme se na spolupráci.
+                        """)
+                .build();
+        emailService.sendEmailAlert(createAccountAlert);
 
         return BankResponse.builder()
                 .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
